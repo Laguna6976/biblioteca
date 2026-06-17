@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteca Digital de Sistemas Informáticos</title>
+    <style>
+        :root {
+            --bg-principal: #0f172a;
+            --bg-tarjeta: #1e293b;
+            --texto-principal: #f8fafc;
+            --texto-secundario: #94a3b8;
+            --accento: #10b981;
+            --accento-hover: #059669;
+            --azul-tech: #3b82f6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-principal);
+            color: var(--texto-principal);
+            padding-bottom: 50px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e1b4b, #0f172a);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--accento);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            color: var(--texto-principal);
+            margin-bottom: 10px;
+        }
+
+        header h1 span {
+            color: var(--accento);
+        }
+
+        header p {
+            color: var(--texto-secundario);
+            font-size: 1.1rem;
+        }
+
+        .contenedor-herramientas {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .caja-busqueda {
+            width: 100%;
+            padding: 15px 20px;
+            border-radius: 8px;
+            border: 2px solid var(--bg-tarjeta);
+            background-color: var(--bg-tarjeta);
+            color: white;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .caja-busqueda:focus {
+            outline: none;
+            border-color: var(--azul-tech);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+
+        .filtros-categoria {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .btn-filtro {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 20px;
+            background-color: var(--bg-tarjeta);
+            color: var(--texto-secundario);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-filtro:hover, .btn-filtro.activo {
+            background-color: var(--azul-tech);
+            color: white;
+        }
+
+        .galeria-libros {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .tarjeta-libro {
+            background-color: var(--bg-tarjeta);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border-top: 4px solid var(--azul-tech);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .tarjeta-libro:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+
+        .tag-categoria {
+            align-self: flex-start;
+            background-color: rgba(16, 185, 129, 0.2);
+            color: var(--accento);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+        }
+
+        .titulo-libro {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .autor-libro {
+            color: var(--texto-secundario);
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+            flex-grow: 1;
+        }
+
+        .metadatos {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 15px;
+            margin-bottom: 15px;
+            font-size: 0.85rem;
+            color: var(--texto-secundario);
+        }
+
+        .btn-descargar {
+            display: block;
+            text-align: center;
+            background-color: var(--accento);
+            color: white;
+            padding: 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-descargar:hover {
+            background-color: var(--accento-hover);
+        }
+
+        .sin-resultados {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            color: var(--texto-secundario);
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1><span>&lt;</span> Biblioteca Informática <span>/&gt;</span></h1>
+        <p>Tu repositorio de conocimiento técnico, redes y ciberseguridad</p>
+    </header>
+
+    <div class="contenedor-herramientas">
+        <input type="text" id="buscador" class="caja-busqueda" placeholder="🔍 Buscar por título o autor...">
+
+        <div class="filtros-categoria" id="contenedor-filtros">
+            <button class="btn-filtro activo" onclick="filtrarCategoria('todos')">Todos</button>
+            <button class="btn-filtro" onclick="filtrarCategoria('Ciberseguridad')">Ciberseguridad</button>
+            <button class="btn-filtro" onclick="filtrarCategoria('Inteligencia artificial')">Inteligencia Artificial</button>
+            <button class="btn-filtro" onclick="filtrarCategoria('Aprendizaje automático')">Aprendizaje Automático</button>
+            <button class="btn-filtro" onclick="filtrarCategoria('Redes')">Redes</button>
+            <button class="btn-filtro" onclick="filtrarCategoria('Sistemas operativos')">Sistemas Operativos</button>
+            <button class="btn-filtro" onclick="filtrarCategoria('Arquitectura de computadoras')">Arquitectura</button>
+            <button class="btn-filtro" onclick="filtrarCategoria('Programación')">Programación</button>
+        </div>
+    </div>
+
+    <main class="galeria-libros" id="galeria"></main>
+
+    <script>
+        // Datos extraídos directamente de tu documento indexado
+        const libros = [
+            {
+                titulo: "La ciberseguridad práctica aplicada a las redes, servidores y navegadores web",
+                autor: "Abad Parrales, W. M., Cañarte Rodríguez, T. C., et al.",
+                categoria: "Ciberseguridad",
+                editorial: "Editorial Área de Innovación y Desarrollo, S.L.",
+                anio: "2019",
+                enlace: "https://drive.google.com/file/d/1SQ408mKDvbmSEiObKTRHU2C8QKYOs6fS/view?usp=drive_link"
+            },
+            {
+                titulo: "Introducción a la ciberseguridad y sus aplicaciones en México",
+                autor: "Aldeco Pérez, R., Gallegos García, G., & Rodríguez Henríquez, L. M.",
+                categoria: "Ciberseguridad",
+                editorial: "Academia Mexicana de Computación, A. C.",
+                anio: "2020",
+                enlace: "https://drive.google.com/file/d/13CzTP4_jW5nnJvFUSr67JjFU8a77yWpI/view?usp=drive_link"
+            },
+            {
+                titulo: "Redes de comunicación",
+                autor: "Argüelles Rodríguez, A., Balayo Atanes, B., & Ares Sainz, J. L.",
+                categoria: "Redes",
+                editorial: "IES Eduardo Blanco Amor",
+                anio: "2016",
+                enlace: "https://drive.google.com/file/d/1kPtF11fDRs9dHcA6TLbDvbpRrs93TwHM/view?usp=drivesdk"
+            },
+            {
+                titulo: "Operating systems: Three easy pieces",
+                autor: "Arpaci-Dusseau, R. H., & Arpaci-Dusseau, A. C.",
+                categoria: "Sistemas operativos",
+                editorial: "Arpaci-Dusseau Books",
+                anio: "2018",
+                enlace: "https://drive.google.com/file/d/1Cw4VqmYhCPfJD7Mql7ZwBksZGCXUnWPt/view?usp=drive_link"
+            },
+            {
+                titulo: "Introducción a la seguridad informática",
+                autor: "Baca Urbina, G.",
+                categoria: "Ciberseguridad",
+                editorial: "Grupo Editorial Patria",
+                anio: "2016",
+                enlace: "https://drive.google.com/file/d/1lM-ZsNtn_VWsYB_eBZuCbWLjmkscfDpz/view?usp=drive_link"
+            },
+            {
+                titulo: "Inteligencia artificial avanzada",
+                autor: "Benítez, R., Escudero, G., Kanaan, S., & Masip, D.",
+                categoria: "Inteligencia artificial",
+                editorial: "UOC",
+                anio: "2013",
+                enlace: "https://drive.google.com/file/d/1GiW6xoIVghfcdgOmuAegRVc8xW9oKP3V/view?usp=sharing"
+            },
+            {
+                titulo: "Desarrollo de un modelo de seguridad de la información en ambientes educativos virtuales",
+                autor: "Chavez Salazar, V. H.",
+                categoria: "Ciberseguridad",
+                editorial: "Revista Educación Superior",
+                anio: "2016",
+                enlace: "https://drive.google.com/file/d/1FzshNClJjHq9gol1vPp9p_ISaGyaKwQ0/view?usp=drivesdk"
+            },
+            {
+                titulo: "Ciberseguridad: retos actuales y líneas de investigación",
+                autor: "Inria",
+                categoria: "Ciberseguridad",
+                editorial: "Inria (Libro Blanco N°3)",
+                anio: "2022",
+                enlace: "https://drive.google.com/file/d/1iP3p1MXFbSQSEbMkj2kmYROi5gJZpdTt/view"
+            },
+            {
+                titulo: "Ciberseguridad para trabajadores remotos: Cómo proteger todos los dispositivos",
+                autor: "Cisco",
+                categoria: "Ciberseguridad",
+                editorial: "Cisco",
+                anio: "2020",
+                enlace: "https://drive.google.com/file/d/19dSZk6O0cEbVx5kh8dSVCLqeugR9jfd0/view?usp=drive_link"
+            },
+            {
+                titulo: "Redes informáticas: Nociones fundamentales (Protocolos, Arquitecturas, Virtualización)",
+                autor: "Dordoigne, J.",
+                categoria: "Redes",
+                editorial: "Ediciones ENI",
+                anio: "2019",
+                enlace: "https://drive.google.com/file/d/1iMEOfacaSdRrESp4ZiZQQAKx2IVg1kFq/view?usp=drive_link"
+            },
+            {
+                titulo: "Manual formativo: Ciberseguridad y seguridad informática",
+                autor: "Fór-mate. Academia Formación",
+                categoria: "Ciberseguridad",
+                editorial: "Fór-mate. Academia Formación",
+                anio: "s. f.",
+                enlace: "https://drive.google.com/file/d/1dLcwde0xMppqluPyjmcF3LNE6kmKvire/view?usp=drive_link"
+            },
+            {
+                titulo: "Inteligencia artificial: Fundamentos, práctica y aplicaciones",
+                autor: "García Serrano, A.",
+                categoria: "Inteligencia artificial",
+                editorial: "RC Libros",
+                anio: "2016",
+                enlace: "https://drive.google.com/file/d/1-QRegJQ3X4JVM0ZHVa71mE4SYSBEbnYM/view?usp=sharing"
+            },
+            {
+                titulo: "Hands-on machine learning with Scikit-Learn, Keras, and TensorFlow",
+                autor: "Géron, A.",
+                categoria: "Aprendizaje automático",
+                editorial: "O'Reilly Media",
+                anio: "2022",
+                enlace: "https://drive.google.com/file/d/1BXNk8FkwU7RmuOiYIBeTigAzuY-znBgf/view?usp=sharing"
+            },
+            {
+                titulo: "Deep Learning",
+                autor: "Goodfellow, I. , Bengio Y. & Courville A.",
+                categoria: "Aprendizaje automático",
+                editorial: "MIT Press",
+                anio: "2016",
+                enlace: "https://drive.google.com/file/d/169rt8J7PSFFnKwVUPtLY6Qs46eBy_Qor/view?usp=sharing"
+            },
+            {
+                titulo: "Hacking ético: Teoría & prácticas",
+                autor: "Haz Lopez, L. V., Garzón Balcazar, J. M., et al.",
+                categoria: "Ciberseguridad",
+                editorial: "Editorial CID",
+                anio: "2024",
+                enlace: "https://drive.google.com/file/d/1Oen3W-R8X1kGLZnzbOth6iQtd58QxykE/view?usp=drive_link"
+            },
+            {
+                titulo: "ChatGPT: tus primeros prompts con 100 ejemplos",
+                autor: "Hernández, J. A., Conde, J., Querol, B., et al.",
+                categoria: "Inteligencia artificial",
+                editorial: "Amazon Kindle Direct Publishing",
+                anio: "2023",
+                enlace: "https://drive.google.com/file/d/1PLyL4axp9f2iXWFrDbkwfJqwKaNA8Tf2/view?usp=sharing"
+            },
+            {
+                titulo: "Guía de ciberseguridad: La ciberseguridad al alcance de todos",
+                autor: "INCIBE",
+                categoria: "Ciberseguridad",
+                editorial: "Oficina de Seguridad del Internauta",
+                anio: "s. f.",
+                enlace: "https://drive.google.com/file/d/1yWpP3xW2837jQdZkLTMhdMY03Bfi_YTg/view?usp=drive_link"
+            },
+            {
+                titulo: "Alfabeto de ciberseguridad de Kaspersky para niños",
+                autor: "Kaspersky",
+                categoria: "Ciberseguridad",
+                editorial: "Kaspersky",
+                anio: "s. f.",
+                enlace: "https://drive.google.com/file/d/1PV8TkKV_RrlKjlXenggdNy9EogSgyGKT/view?usp=drive_link"
+            },
+            {
+                titulo: "Guide to Computer Network Security",
+                autor: "Kizza, J. M.",
+                categoria: "Ciberseguridad",
+                editorial: "Springer",
+                anio: "2017",
+                enlace: "https://drive.google.com/file/d/1rgJA0oeSS_wJmyk0tJOomxzYftrTx13a/view?usp=drive_link"
+            },
+            {
+                titulo: "Linux Kernel Development",
+                autor: "Love, R.",
+                categoria: "Sistemas operativos",
+                editorial: "Addison-Wesley",
+                anio: "2020",
+                enlace: "https://drive.google.com/file/d/1oyccr7pbl3q83gRc1j5vBLcinjR-tnjA/view?usp=drive_link"
+            },
+            {
+                titulo: "Guía general de redes y comunicación de datos",
+                autor: "Marcillo, X.",
+                categoria: "Redes",
+                editorial: "IST Quito, Doxa Edition",
+                anio: "2024",
+                enlace: "https://drive.google.com/file/d/1lpG0pzv5apJ1_2Z1RtCXSBYaNLwboYx-/view?usp=drive_link"
+            },
+            {
+                titulo: "Machine learning",
+                autor: "Mitchell, T. M.",
+                categoria: "Aprendizaje automático",
+                editorial: "McGraw-Hill",
+                anio: "1997",
+                enlace: "https://drive.google.com/file/d/1EjwTB5hRrq8VuRz8Z7L-5psq01k87cg1/view?usp=sharing"
+            },
+            {
+                titulo: "Artificial intelligence: A new synthesis",
+                autor: "Nilsson, N. J.",
+                categoria: "Inteligencia artificial",
+                editorial: "Morgan Kaufmann",
+                anio: "2009",
+                enlace: "https://drive.google.com/file/d/1XJe8u0ZTFfBtHrsbatkdqWMQ88fuEWwq/view?usp=sharing"
+            },
+            {
+                titulo: "Network programmability and automation",
+                autor: "Oswalt, M., Adell, C., Lowe, S. S., y Edelman, J.",
+                categoria: "Programación",
+                editorial: "O'Reilly Media, Inc.",
+                anio: "2023",
+                enlace: "https://drive.google.com/file/d/1eSseQTsaNRUDnWjYzf5SKPxFro_2CIkr/view?usp=drivesdk"
+            },
+            {
+                titulo: "Computer Organization and Design RISC-V Edition",
+                autor: "Patterson, D. A., & Hennessy, J. L.",
+                categoria: "Arquitectura de computadoras",
+                editorial: "Morgan Kaufmann",
+                anio: "2021",
+                enlace: "https://drive.google.com/file/d/1GYO2YIF4iS5q6PPQioaleS6CHRVjXGa_/view?usp=drive_link"
+            },
+            {
+                titulo: "Inteligencia artificial con aplicaciones a la ingeniería",
+                autor: "Ponce Cruz, P.",
+                categoria: "Inteligencia artificial",
+                editorial: "Alfaomega",
+                anio: "2010",
+                enlace: "https://drive.google.com/file/d/14ZFzh3X-V5K9Tik4Pe-m8PMZqxAWJu2o/view?usp=sharing"
+            },
+            {
+                titulo: "Comparación de algoritmos para detección de intrusos en entornos de flujo de datos",
+                autor: "Rivero Pérez, J. L., Ribeiro, B., & Héctor Ortiz, K.",
+                categoria: "Ciberseguridad",
+                editorial: "Revista Universidad y Sociedad",
+                anio: "2016",
+                enlace: "https://drive.google.com/file/d/1C7Nx63weXWY7a6evZcTesqHto0Lm0mFh/view?usp=drivesdk"
+            },
+            {
+                titulo: "Internet de las cosas: teoría y práctica",
+                autor: "Román Gallardo, A., Herrera Morales, J. R., et al.",
+                categoria: "Redes",
+                editorial: "Universidad de Colima",
+                anio: "2023",
+                enlace: "https://drive.google.com/file/d/1I5ghAoi_znN8vm_zab-UZnG0yIZSstDQ/view?usp=drivesdk"
+            },
+            {
+                titulo: "Inteligencia artificial: 101 cosas que debes saber hoy sobre nuestro futuro",
+                autor: "Rouhiainen, L.",
+                categoria: "Inteligencia artificial",
+                editorial: "Alienta",
+                anio: "2018",
+                enlace: "https://drive.google.com/file/d/1taP5NGncrRj4cg5iu0UgfOh82aclQy6l/view?usp=sharing"
+            },
+            {
+                titulo: "Inteligencia artificial: un enfoque moderno",
+                autor: "Russell, S. J. & Norvig, P.",
+                categoria: "Inteligencia artificial",
+                editorial: "Pearson Education",
+                anio: "2004",
+                enlace: "https://drive.google.com/file/d/1lBwKGBIyBkYO-Q8xd3ZX-n5JRCprJKk2/view?usp=sharing"
+            }
+        ];
+
+        let categoriaActual = 'todos';
+
+        function mostrarLibros() {
+            const galeria = document.getElementById('galeria');
+            const terminoBusqueda = document.getElementById('buscador').value.toLowerCase();
+            galeria.innerHTML = '';
+
+            const librosFiltrados = libros.filter(libro => {
+                const coincideCategoria = (categoriaActual === 'todos' || libro.categoria === categoriaActual);
+                const coincideTexto = libro.titulo.toLowerCase().includes(terminoBusqueda) || 
+                                     libro.autor.toLowerCase().includes(terminoBusqueda);
+                return coincideCategoria && coincideTexto;
+            });
+
+            if (librosFiltrados.length === 0) {
+                galeria.innerHTML = `<div class="sin-resultados">No se encontraron libros que coincidan con la búsqueda.</div>`;
+                return;
+            }
+
+            librosFiltrados.forEach(libro => {
+                const tarjeta = document.createElement('div');
+                tarjeta.className = 'tarjeta-libro';
+                tarjeta.innerHTML = `
+                    <div>
+                        <span class="tag-categoria">${libro.categoria}</span>
+                        <div class="titulo-libro">${libro.titulo}</div>
+                        <div class="autor-libro">Por: ${libro.autor}</div>
+                    </div>
+                    <div>
+                        <div class="metadatos">
+                            <div><strong>Editorial:</strong> ${libro.editorial}</div>
+                            <div><strong>Año:</strong> ${libro.anio}</div>
+                        </div>
+                        <a href="${libro.enlace}" target="_blank" class="btn-descargar">📖 Ver / Descargar</a>
+                    </div>
+                `;
+                galeria.appendChild(tarjeta);
+            });
+        }
+
+        function filtrarCategoria(categoria) {
+            categoriaActual = categoria;
+            
+            // Actualizar botones de filtro activos
+            const botones = document.querySelectorAll('.btn-filtro');
+            botones.forEach(btn => btn.classList.remove('activo'));
+            
+            event.target.classList.add('activo');
+            mostrarLibros();
+        }
+
+        // Listener del buscador
+        document.getElementById('buscador').addEventListener('input', mostrarLibros);
+
+        // Render inicial
+        mostrarLibros();
+    </script>
+</body>
+</html>
